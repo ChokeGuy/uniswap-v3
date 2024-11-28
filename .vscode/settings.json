@@ -1,0 +1,9 @@
+{
+  "solidity.compileUsingRemoteVersion": "v0.7.6+commit.7338295f",
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "files.autoSave": "onFocusChange",
+  "cSpell.words": ["Nonfungible"]
+}
