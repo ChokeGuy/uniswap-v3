@@ -8,6 +8,7 @@ import {
 } from '@uniswap/sdk-core';
 
 import {
+  FeeAmount,
   Pool,
   Route,
   SwapOptions,
@@ -18,6 +19,8 @@ import {
 import { AbiCoder, Result, Signer } from 'ethers';
 import { QUOTE_ADDRESS, SWAP_ROUTER_ADDRESS } from '../constants/address';
 import { format } from '../utils';
+import { getContract } from './pool';
+import { SWAP_ROUTER_ABI } from '../constants/abi';
 
 export type TokenTrade = Trade<Token, Token, TradeType>;
 
@@ -63,20 +66,22 @@ async function createTrade(
   return uncheckedTrade;
 }
 
-async function swap(
+async function singleSwap(
   pool: Pool,
+  signer: any,
   tokenIn: Token,
   tokenOut: Token,
-  swapAmount: number,
+  amountIn: number,
+  slippageTolerance: Percent,
+  deadline: number,
 ) {
-  const [deployer] = await ethers.getSigners();
   const swapRoute = new Route([pool], tokenIn, tokenOut);
 
   const amountOut = await getOutputQuote(
     swapRoute,
     tokenIn,
-    swapAmount,
-    deployer,
+    amountIn,
+    signer.address,
   );
 
   console.log(
@@ -85,9 +90,9 @@ async function swap(
   const trade = await createTrade(swapRoute, tokenIn, tokenOut, amountOut);
 
   const options: SwapOptions = {
-    slippageTolerance: new Percent(50, 10_000),
-    deadline: Math.floor(Date.now() / 1000) + 60 * 20,
-    recipient: deployer.address,
+    slippageTolerance: slippageTolerance,
+    deadline: deadline,
+    recipient: signer.address,
   };
 
   const { calldata, value } = SwapRouter.swapCallParameters([trade], options);
@@ -96,10 +101,72 @@ async function swap(
     data: calldata,
     to: SWAP_ROUTER_ADDRESS,
     value: value,
-    from: deployer.address,
+    from: signer.address,
   };
 
-  await deployer.sendTransaction(transaction);
+  await signer.sendTransaction(transaction);
 }
 
-export { swap, getOutputQuote, createTrade };
+const FEE_SIZE = 3;
+
+export function encodePath(path: string[], fees: FeeAmount[]): string {
+  if (path.length != fees.length + 1) {
+    throw new Error('path/fee lengths do not match');
+  }
+
+  let encoded = '0x';
+  for (let i = 0; i < fees.length; i++) {
+    // 20 byte encoding of the address
+    encoded += path[i].slice(2);
+    // 3 byte encoding of the fee
+    encoded += fees[i].toString(16).padStart(2 * FEE_SIZE, '0');
+  }
+  // encode the final token
+  encoded += path[path.length - 1].slice(2);
+
+  return encoded.toLowerCase();
+}
+
+async function multiSwap(
+  signer: any,
+  tokenAddrPaths: string[],
+  fees: number[],
+  deadLine: number,
+  amountIn: number,
+  minAmountOut: number,
+) {
+  const path = encodePath(tokenAddrPaths, fees);
+
+  //[token1,fee,token2,fee,token3,fee,token4]
+  const params = {
+    path,
+    recipient: signer.address,
+    deadline: deadLine,
+    amountIn: ethers.parseEther(amountIn.toString()),
+    amountOutMinimum: minAmountOut,
+  };
+
+  const swapRouterContract = await getContract(
+    SWAP_ROUTER_ADDRESS,
+    SWAP_ROUTER_ABI,
+  );
+
+  const encodedData = swapRouterContract.interface.encodeFunctionData(
+    'exactInput',
+    [params],
+  );
+
+  const transaction = {
+    from: signer.address,
+    to: SWAP_ROUTER_ADDRESS,
+    data: encodedData,
+    gasLimit: 1000000,
+  };
+
+  const res = await signer.sendTransaction(transaction);
+  await res.wait();
+
+  console.log('Receipt: ', res);
+}
+
+export { singleSwap, multiSwap, getOutputQuote, createTrade };

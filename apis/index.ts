@@ -1,9 +1,10 @@
 import { createPoolAndCompute, getContract, getPoolState } from './pool';
-import { swap, getOutputQuote, createTrade } from './swap';
+import { singleSwap, multiSwap, getOutputQuote, createTrade } from './swap';
 import { addLiquidity, removeLiquidity } from './liquidity';
 
 export {
-  swap,
+  singleSwap,
+  multiSwap,
   getOutputQuote,
   createTrade,
   addLiquidity,

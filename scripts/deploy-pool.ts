@@ -3,7 +3,7 @@ import { Percent } from '@uniswap/sdk-core';
 import { FeeAmount } from '@uniswap/v3-sdk';
 import { createPoolAndCompute } from '../apis/pool';
 import { encodePriceSqrt, format } from '../utils/format';
-import { addLiquidity, removeLiquidity, swap } from '../apis';
+import { addLiquidity, removeLiquidity, singleSwap } from '../apis';
 import {
   POSITION_MANAGER_ADDRESS,
   SWAP_ROUTER_ADDRESS,
@@ -95,7 +95,15 @@ async function main() {
     `Token2  before swap: ${format(await token2.balanceOf(deployer.address))}`,
   );
 
-  await swap(configuredPool, Token1, Token2, 1);
+  await singleSwap(
+    configuredPool,
+    deployer,
+    Token1,
+    Token2,
+    1,
+    new Percent(50, 10_000),
+    Math.floor(Date.now() / 1000) + 60 * 20,
+  );
 
   console.log(
     `Token1 after swap: ${format(await token1.balanceOf(deployer.address))}`,
