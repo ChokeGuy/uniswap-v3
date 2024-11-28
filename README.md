@@ -2,6 +2,8 @@
 
 # Follow step by step:
 
+Create .env file in root folder
+
 npm i
 
 npx hardhat node
