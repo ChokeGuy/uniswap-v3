@@ -1,4 +1,5 @@
 import { ethers } from 'hardhat';
+import { Percent } from '@uniswap/sdk-core';
 import { FeeAmount } from '@uniswap/v3-sdk';
 import { createPoolAndCompute } from '../apis/pool';
 import { encodePriceSqrt, format } from '../utils/format';
@@ -61,23 +62,46 @@ async function main() {
       token2Decimals,
     );
 
-  // console.log(await getPositions(deployer.address));
+  console.log(
+    'Postion before add liquidity:',
+    await getPositions(deployer.address),
+  );
 
-  // await addLiquidity(deployer, position);
-
-  console.log(await getPositions(deployer.address));
-
-  await removeLiquidity(deployer, position, 1, Token1, Token2);
-
-  console.log(await getPositions(deployer.address));
-
-  // await swap(configuredPool, Token1, Token2);
+  await addLiquidity(deployer, position);
 
   console.log(
-    `Bal token1: ${format(await token1.balanceOf(deployer.address))}`,
+    'Postion after add liquidity:',
+    await getPositions(deployer.address),
+  );
+
+  await removeLiquidity(
+    deployer,
+    position,
+    3,
+    Token1,
+    Token2,
+    new Percent(50, 100),
+  );
+
+  console.log(
+    'Position after remove liquidity:',
+    await getPositions(deployer.address),
+  );
+
+  console.log(
+    `Token1 before swap: ${format(await token1.balanceOf(deployer.address))}`,
   );
   console.log(
-    `Bal token2: ${format(await token2.balanceOf(deployer.address))}`,
+    `Token2  before swap: ${format(await token2.balanceOf(deployer.address))}`,
+  );
+
+  await swap(configuredPool, Token1, Token2, 1);
+
+  console.log(
+    `Token1 after swap: ${format(await token1.balanceOf(deployer.address))}`,
+  );
+  console.log(
+    `Token2  after swap: ${format(await token2.balanceOf(deployer.address))}`,
   );
 }
 

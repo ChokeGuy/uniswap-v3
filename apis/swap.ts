@@ -63,18 +63,30 @@ async function createTrade(
   return uncheckedTrade;
 }
 
-async function swap(pool: Pool, token1: Token, token2: Token) {
+async function swap(
+  pool: Pool,
+  tokenIn: Token,
+  tokenOut: Token,
+  swapAmount: number,
+) {
   const [deployer] = await ethers.getSigners();
-  const swapRoute = new Route([pool], token1, token2);
+  const swapRoute = new Route([pool], tokenIn, tokenOut);
 
-  const amountOut = await getOutputQuote(swapRoute, token1, 1, deployer);
+  const amountOut = await getOutputQuote(
+    swapRoute,
+    tokenIn,
+    swapAmount,
+    deployer,
+  );
 
-  console.log(`Quote: ${format(BigInt(amountOut.toString()))}`);
-  const trade = await createTrade(swapRoute, token1, token2, amountOut);
+  console.log(
+    `Estimate Amount Token Out: ${format(BigInt(amountOut.toString()))}`,
+  );
+  const trade = await createTrade(swapRoute, tokenIn, tokenOut, amountOut);
 
   const options: SwapOptions = {
-    slippageTolerance: new Percent(50, 10_000), // 50 bips, or 0.50%
-    deadline: Math.floor(Date.now() / 1000) + 60 * 20, // 20 minutes from the current Unix time
+    slippageTolerance: new Percent(50, 10_000),
+    deadline: Math.floor(Date.now() / 1000) + 60 * 20,
     recipient: deployer.address,
   };
 

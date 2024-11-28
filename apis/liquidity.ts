@@ -40,6 +40,7 @@ async function removeLiquidity(
   index: number,
   tokenA: Token,
   tokenB: Token,
+  removePercent: Percent,
 ) {
   const collectOptions: Omit<CollectOptions, 'tokenId'> = {
     expectedCurrencyOwed0: CurrencyAmount.fromRawAmount(tokenA, 0),
@@ -60,7 +61,7 @@ async function removeLiquidity(
     deadline: Math.floor(Date.now() / 1000) + 60 * 20,
     slippageTolerance: new Percent(50, 10_000),
     // percentage of liquidity to remove
-    liquidityPercentage: new Percent(50, 100),
+    liquidityPercentage: removePercent,
     collectOptions,
     tokenId: positionId,
   };
