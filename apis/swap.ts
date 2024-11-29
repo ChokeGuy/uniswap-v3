@@ -77,12 +77,7 @@ async function singleSwap(
 ) {
   const swapRoute = new Route([pool], tokenIn, tokenOut);
 
-  const amountOut = await getOutputQuote(
-    swapRoute,
-    tokenIn,
-    amountIn,
-    signer.address,
-  );
+  const amountOut = await getOutputQuote(swapRoute, tokenIn, amountIn, signer);
 
   console.log(
     `Estimate Amount Token Out: ${format(BigInt(amountOut.toString()))}`,
@@ -165,8 +160,6 @@ async function multiSwap(
 
   const res = await signer.sendTransaction(transaction);
   await res.wait();
-
-  console.log('Receipt: ', res);
 }
 
 export { singleSwap, multiSwap, getOutputQuote, createTrade };

@@ -7,7 +7,7 @@ import {
   Pool,
   Position,
 } from '@uniswap/v3-sdk';
-import { NFT_MANAGER_ABI, POOL_ABI } from '../constants/abi';
+import { FACTORY_ABI, NFT_MANAGER_ABI, POOL_ABI } from '../constants/abi';
 import {
   FACTORY_ADDRESS,
   POSITION_MANAGER_ADDRESS,
@@ -56,7 +56,9 @@ async function createPoolAndCompute(
 
   await nftPosManagerContract
     .connect(deployer)
-    .createAndInitializePoolIfNecessary(token1Addr, token2Addr, fee, price);
+    .createAndInitializePoolIfNecessary(token1Addr, token2Addr, fee, price, {
+      gasLimit: 5000000,
+    });
 
   const Token1 = new Token(
     chainId,
@@ -80,6 +82,7 @@ async function createPoolAndCompute(
     tokenB: Token2,
     fee,
   });
+
   const poolContract = new ethers.Contract(poolAddr, POOL_ABI, deployer);
 
   const state = await getPoolState(poolContract);
