@@ -82,6 +82,7 @@ async function singleSwap(
   console.log(
     `Estimate Amount Token Out: ${format(BigInt(amountOut.toString()))}`,
   );
+
   const trade = await createTrade(swapRoute, tokenIn, tokenOut, amountOut);
 
   const options: SwapOptions = {
@@ -124,6 +125,9 @@ function encodePath(path: string[], fees: FeeAmount[]): string {
 
 async function multiSwap(
   signer: any,
+  pools: Pool[],
+  tokenIn: Token,
+  tokenOut: Token,
   tokenAddrPaths: string[],
   fees: number[],
   deadLine: number,
@@ -131,6 +135,14 @@ async function multiSwap(
   minAmountOut: number,
 ) {
   const path = encodePath(tokenAddrPaths, fees);
+
+  const swapRoute = new Route(pools, tokenIn, tokenOut);
+
+  const amountOut = await getOutputQuote(swapRoute, tokenIn, amountIn, signer);
+
+  console.log(
+    `Estimate Amount Token Out: ${format(BigInt(amountOut.toString()))}`,
+  );
 
   //[token1,fee,token2,fee,token3,fee,token4]
   const params = {

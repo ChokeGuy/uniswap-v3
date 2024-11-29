@@ -144,6 +144,9 @@ async function main() {
 
   await multiSwap(
     deployer,
+    [pool1, pool2],
+    Token1,
+    Token3,
     [TOKEN1_ADDRESS, TOKEN2_ADDRESS, TOKEN3_ADDRESS],
     [fee, fee],
     Math.floor(Date.now() / 1000) + 60 * 20,
