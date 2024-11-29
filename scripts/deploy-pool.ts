@@ -19,10 +19,6 @@ async function main() {
   const token2 = await ethers.getContractAt('MyToken', TOKEN2_ADDRESS);
   const token3 = await ethers.getContractAt('MyToken', TOKEN3_ADDRESS);
 
-  const token1Addr = await token1.getAddress();
-  const token2Addr = await token2.getAddress();
-  const token3Addr = await token3.getAddress();
-
   // (0.05, 0.3, 1, 0.01)
   const fee: FeeAmount = 0.3 * 10000;
   const price = encodePriceSqrt(1, 1);
@@ -41,32 +37,32 @@ async function main() {
   await approve(
     ethers.MaxInt256,
     ethers.MaxInt256,
-    token1Addr,
-    token2Addr,
+    TOKEN1_ADDRESS,
+    TOKEN2_ADDRESS,
     POSITION_MANAGER_ADDRESS,
   );
 
   await approve(
     ethers.MaxInt256,
     ethers.MaxInt256,
-    token2Addr,
-    token3Addr,
+    TOKEN2_ADDRESS,
+    TOKEN3_ADDRESS,
     POSITION_MANAGER_ADDRESS,
   );
 
   await approve(
     ethers.MaxInt256,
     ethers.MaxInt256,
-    token1Addr,
-    token2Addr,
+    TOKEN1_ADDRESS,
+    TOKEN2_ADDRESS,
     SWAP_ROUTER_ADDRESS,
   );
 
   await approve(
     ethers.MaxInt256,
     ethers.MaxInt256,
-    token2Addr,
-    token3Addr,
+    TOKEN2_ADDRESS,
+    TOKEN3_ADDRESS,
     SWAP_ROUTER_ADDRESS,
   );
 
@@ -76,8 +72,8 @@ async function main() {
     Token1: Token1,
     Token2: Token2F,
   } = await createPoolAndCompute(
-    token1Addr,
-    token2Addr,
+    TOKEN1_ADDRESS,
+    TOKEN2_ADDRESS,
     amount1,
     amount2,
     fee,
@@ -93,8 +89,8 @@ async function main() {
     Token1: Token3,
     Token2: Token2S,
   } = await createPoolAndCompute(
-    token3Addr,
-    token2Addr,
+    TOKEN3_ADDRESS,
+    TOKEN2_ADDRESS,
     amount2,
     amount3,
     fee,
@@ -104,8 +100,8 @@ async function main() {
     token3Decimals,
   );
 
-  await addLiquidity(deployer, pos1);
-  await addLiquidity(deployer, pos2);
+  // await addLiquidity(deployer, pos1);
+  // await addLiquidity(deployer, pos2);
 
   // await removeLiquidity(
   //   deployer,
