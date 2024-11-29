@@ -104,7 +104,7 @@ async function singleSwap(
 
 const FEE_SIZE = 3;
 
-export function encodePath(path: string[], fees: FeeAmount[]): string {
+function encodePath(path: string[], fees: FeeAmount[]): string {
   if (path.length != fees.length + 1) {
     throw new Error('path/fee lengths do not match');
   }
@@ -162,4 +162,4 @@ async function multiSwap(
   await res.wait();
 }
 
-export { singleSwap, multiSwap, getOutputQuote, createTrade };
+export { singleSwap, multiSwap, getOutputQuote, createTrade, encodePath };
